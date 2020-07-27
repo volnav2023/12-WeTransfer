@@ -17,7 +17,7 @@ require_once 'vendor/autoload.php';
 
 <?php
 
-// echo 'Destinatire : '. $destinataire;
+echo 'Destinatire : '. $destinataire;
 
 if(isset($_POST['valider'])){
     $destinataire=$_POST['destinataire'];
