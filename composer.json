@@ -1,0 +1,6 @@
+{
+    "name": "david/06-mailtrap",
+    "require": {
+        "swiftmailer/swiftmailer": "^5.4"
+    }
+}
