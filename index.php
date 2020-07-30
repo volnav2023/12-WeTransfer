@@ -26,11 +26,12 @@ if (isset($_POST['valider'])) {
     $destinataire = $_POST['destinataire'];
     var_dump($destinataire);
     // print_r($destinataire);
-    $files = $_FILES['filesToUpload']['name'][2];
+    $files = $_FILES['filesToUpload']['name'];
     // $files [1] = $_FILES['file[1]'];
     // $files [2] = $_FILES['file[2]'];
     // $files [3] = $_FILES['file[3]'];
     var_dump($_FILES);
+    var_dump($files);
     // print_r($_FILES);
     // echo 'Files : ' . $files [1];
     // echo 'Files : ' . $files [2];
