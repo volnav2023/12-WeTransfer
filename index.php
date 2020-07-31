@@ -8,7 +8,7 @@
     <h1>Bienvenue sur le site de David </h1>
     <h2>Merci de saisir :</h2>
     <form name="saisie" method="post" enctype="multipart/form-data" action="index.php">
-        Entrez l''e-mail du destinataire : <input type="text" name="destinataire" /> <br />
+        E-mail du destinataire : <input type="text" name="destinataire" /> <br />
         <input name="filesToUpload[]" type="file" size="20" multiple="multiple" />
         <input type="submit" name="valider" value="OK" />
     </form>
@@ -17,73 +17,74 @@
 </html>
 
 <?php
-// require_once("vendor/autoload.php");
+
 require_once 'vendor/autoload.php';
 
-// echo 'Destinatire : '. $destinataire;
-
+// READ INPUT FROM FORM
 if (isset($_POST['valider'])) {
+
     $destinataire = $_POST['destinataire'];
-    var_dump($destinataire);
-    // print_r($destinataire);
-    $files = $_FILES['filesToUpload']['name'];
-    // $files [1] = $_FILES['file[1]'];
-    // $files [2] = $_FILES['file[2]'];
-    // $files [3] = $_FILES['file[3]'];
-    var_dump($_FILES);
-    var_dump($files);
-    // print_r($_FILES);
-    // echo 'Files : ' . $files [1];
-    // echo 'Files : ' . $files [2];
-    // echo 'Files : ' . $files [3];
+
+    $fileTypes = $_FILES['filesToUpload']['type'];
+
+    echo ('$_FILES[\'filesToUpload\'][\'name\']<br>');
+    var_dump($_FILES['filesToUpload']['name']);
+    echo ('$_FILES[\'filesToUpload\'][\'tmp_name\']<br>');
+    var_dump($_FILES['filesToUpload']['tmp_name']);
+
+
+    // PREPARE ZIP ARCHIVE
+    $zipFile = new ZipArchive();
+
+    if ($zipFile->open('tmpzip.zip', ZipArchive::CREATE) === TRUE) {
+        for ($i = 0; $i < count($_FILES['filesToUpload']['name']); $i++) {
+            $zipFile->addFile($_FILES['filesToUpload']['tmp_name'][$i], $_FILES['filesToUpload']['name'][$i]);
+        }
+        $zipFile->close();
+        $zip_name = str_replace(' ', '', "zip_for_mail_" . microtime() . ".zip");
+        rename('tmpzip.zip', '../upload/' . $zip_name);
+        echo 'Zip file créé<br>';
+    } else {
+        echo 'Zip file non créé<br>';
+    }
 }
 
-
+// PREPARE AND SEND E-MAIL
 // Create the Transport
-echo 'Create transport';
+echo 'Create transport<br>';
 $transport = (new Swift_SmtpTransport('smtp.mailtrap.io', 465))
     ->setUsername('e5b9fdd51104cd')
     ->setPassword('f15b2a565cf13b');
 
-// if ($_SERVER['SERVER_NAME'] == 'localhost') {
-//     $transport = (new Swift_SmtpTransport('mailtrap.io', 25))
-//         ->setUsername('e5b9fdd51104cd')
-//         ->setPassword('f15b2a565cf13b');
-// } else {
-//     $transport = (new Swift_MailTransport());
-// }
-
 // Create the Mailer using your created Transport
-echo 'Create mailer';
+echo 'Create mailer<br>';
 $mailer = new Swift_Mailer($transport);
 
-// $message = Swift_Message::newInstance('Bienvenue')
-// ->setFrom(['contact@flechet.com' => 'flechet.com'])
-// ->setTo(['demo@flechet.com'])
-// ->setBody('Salut les gens');
-
 // Create a message
-echo 'Create message';
+$zip_fullname = '"http://localhost/upload/' . $zip_name . '"';
+echo 'Create message<br>';
+var_dump($zip_fullname);
 $message = (new Swift_Message('Depuis transport mail mailtrap'))
     ->setFrom(['toto@flechet.com' => 'David Flechet'])
     ->setTo(['david@flechet.com', 'other@flechet.com' => 'Autre nom'])
-    ->setBody('Here is the message itself');
-
+    ->setBody(
+        <<<EOT
+    <html>
+    <head></head>
+    <body>
+    Your files are available : <a download href=$zip_fullname>Upload</a>
+    </body>
+    </html>
+    EOT,
+        'text/html'
+    );
 
 // Send the message
-echo 'Send message';
+echo 'Send message<br>';
 $result = $mailer->send($message);
 
 // $mailer->send($message);
-
+echo ('$result<br>');
 var_dump($result);
-
-$mail = mail('demo@flechet.com', 'Depuis transport mail php par défaut', 'Body je fais un test', 'From: toto@flechet.com');
-
-if ($mail) {
-    echo 'Merci';
-} else {
-    echo 'Erreur';
-}
 
 ?>
