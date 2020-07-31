@@ -65,8 +65,8 @@ $zip_fullname = '"http://localhost/upload/' . $zip_name . '"';
 echo 'Create message<br>';
 var_dump($zip_fullname);
 $message = (new Swift_Message('Depuis transport mail mailtrap'))
-    ->setFrom(['toto@flechet.com' => 'David Flechet'])
-    ->setTo(['david@flechet.com', 'other@flechet.com' => 'Autre nom'])
+    ->setFrom(['wetransfer@flechet.com' => 'David Flechet'])
+    ->setTo([$destinataire, 'error@flechet.com' => 'Autre nom'])
     ->setBody(
         <<<EOT
     <html>
